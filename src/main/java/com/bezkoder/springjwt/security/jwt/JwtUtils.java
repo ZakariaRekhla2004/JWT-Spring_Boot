@@ -3,10 +3,16 @@ package com.bezkoder.springjwt.security.jwt;
 import java.security.Key;
 import java.util.Date;
 
+import com.bezkoder.springjwt.repository.UserRepository;
+import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import com.bezkoder.springjwt.security.services.UserDetailsImpl;
@@ -16,6 +22,8 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtils {
+  @Autowired
+  UserDetailsServiceImpl userDetailsService;
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
   @Value("${bezkoder.app.jwtSecret}")
@@ -60,5 +68,18 @@ public class JwtUtils {
     }
 
     return false;
+  }
+  public Authentication getAuthentication(String token) {
+    String username = Jwts.parser()
+            .setSigningKey(jwtSecret)
+            .parseClaimsJws(token)
+            .getBody()
+            .getSubject();
+
+
+    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    return new UsernamePasswordAuthenticationToken(
+            userDetails, "", userDetails.getAuthorities()
+    );
   }
 }

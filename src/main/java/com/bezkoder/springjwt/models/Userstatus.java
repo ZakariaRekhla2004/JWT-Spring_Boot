@@ -1,4 +1,4 @@
-package com.example.ChatRoom.Model;
+package com.bezkoder.springjwt.models;
 
 public enum Userstatus {
         ONLINE, OFFLINE
